@@ -171,7 +171,7 @@ body{font-family:Roboto,Arial,sans-serif;background:var(--dark);color:var(--text
     <span style="font-size:14px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="pt"></span>
   </div>
   <div class="vwrap">
-    <iframe id="pf" allowfullscreen allow="autoplay;encrypted-media;picture-in-picture"></iframe>
+    <iframe id="pf" allowfullscreen allow="autoplay;encrypted-media;picture-in-picture;web-share" referrerpolicy="no-referrer-when-downgrade"></iframe>
   </div>
   <div class="vinfo">
     <h2 id="pft"></h2>
@@ -515,7 +515,7 @@ function play(id, title, ch, views){
   document.getElementById('pt').textContent = title;
   document.getElementById('pft').textContent = title;
   document.getElementById('pm').textContent = `${ch}${views?' • '+views+' views':''}`;
-  document.getElementById('pf').src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
+  document.getElementById('pf').src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`;
   document.getElementById('player').classList.add('open');
   document.body.style.overflow = 'hidden';
   history.pushState({p:true},'');
@@ -644,7 +644,7 @@ async function loadShorts(){
       const ch = esc(item.snippet?.channelTitle||'');
       if(!id) return '';
       return `<div class="short-item">
-        <iframe src="https://www.youtube.com/embed/${id}?autoplay=0&rel=0&loop=1&playlist=${id}"
+        <iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=0&rel=0&loop=1&playlist=${id}&playsinline=1"
           allow="autoplay;encrypted-media" allowfullscreen loading="lazy"></iframe>
         <div class="short-overlay">
           <div class="short-title">${title}</div>
