@@ -17,111 +17,108 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    - name: Install Gradle
+      run: |
+        wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
+        unzip -q gradle-8.4-bin.zip
+        export PATH=$PWD/gradle-8.4/bin:$PATH
+        echo "GRADLE=$PWD/gradle-8.4/bin/gradle" >> $GITHUB_ENV
+
     - name: Create Android Project
       run: |
         mkdir -p app/src/main/assets
         mkdir -p app/src/main/res/values
-        mkdir -p app/src/main/res/mipmap-hdpi
+        mkdir -p app/src/main/java/com/zairudon/ytube
 
         cp ytube_v3.html app/src/main/assets/index.html
 
-        cat > settings.gradle << 'EOF'
-        include ':app'
-        EOF
+        cat > settings.gradle << 'SEOF'
+include ':app'
+SEOF
 
-        cat > build.gradle << 'EOF'
-        buildscript {
-            repositories { google(); mavenCentral() }
-            dependencies { classpath 'com.android.tools.build:gradle:8.2.0' }
+        cat > build.gradle << 'BEOF'
+buildscript {
+    repositories { google(); mavenCentral() }
+    dependencies { classpath 'com.android.tools.build:gradle:8.2.0' }
+}
+allprojects {
+    repositories { google(); mavenCentral() }
+}
+BEOF
+
+        cat > app/build.gradle << 'ABEOF'
+apply plugin: 'com.android.application'
+android {
+    compileSdk 34
+    namespace "com.zairudon.ytube"
+    defaultConfig {
+        applicationId "com.zairudon.ytube"
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.debug
         }
-        allprojects {
-            repositories { google(); mavenCentral() }
-        }
-        EOF
+    }
+}
+ABEOF
 
-        cat > app/build.gradle << 'EOF'
-        apply plugin: 'com.android.application'
-        android {
-            compileSdk 34
-            namespace "com.zairudon.ytube"
-            defaultConfig {
-                applicationId "com.zairudon.ytube"
-                minSdk 21
-                targetSdk 34
-                versionCode 1
-                versionName "1.0"
-            }
-            buildTypes {
-                release {
-                    minifyEnabled false
-                    signingConfig signingConfigs.debug
-                }
-            }
-        }
-        EOF
+        cat > app/src/main/AndroidManifest.xml << 'MEOF'
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <application
+        android:label="YTube"
+        android:usesCleartextTraffic="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
+MEOF
 
-        cat > app/src/main/AndroidManifest.xml << 'EOF'
-        <?xml version="1.0" encoding="utf-8"?>
-        <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-            <uses-permission android:name="android.permission.INTERNET"/>
-            <application
-                android:label="YTube"
-                android:usesCleartextTraffic="true"
-                android:theme="@style/AppTheme">
-                <activity
-                    android:name=".MainActivity"
-                    android:exported="true"
-                    android:configChanges="orientation|screenSize">
-                    <intent-filter>
-                        <action android:name="android.intent.action.MAIN"/>
-                        <category android:name="android.intent.category.LAUNCHER"/>
-                    </intent-filter>
-                </activity>
-            </application>
-        </manifest>
-        EOF
+        cat > app/src/main/java/com/zairudon/ytube/MainActivity.java << 'JEOF'
+package com.zairudon.ytube;
+import android.app.Activity;
+import android.os.Bundle;
+import android.webkit.*;
+import android.view.*;
+public class MainActivity extends Activity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        WebView wv = new WebView(this);
+        wv.getSettings().setJavaScriptEnabled(true);
+        wv.getSettings().setDomStorageEnabled(true);
+        wv.getSettings().setMediaPlaybackRequiresUserGesture(false);
+        wv.setWebChromeClient(new WebChromeClient());
+        wv.loadUrl("file:///android_asset/index.html");
+        setContentView(wv);
+    }
+}
+JEOF
 
-        mkdir -p app/src/main/java/com/zairudon/ytube
-        cat > app/src/main/java/com/zairudon/ytube/MainActivity.java << 'EOF'
-        package com.zairudon.ytube;
-        import android.app.Activity;
-        import android.os.Bundle;
-        import android.webkit.*;
-        import android.view.*;
-        public class MainActivity extends Activity {
-            @Override
-            protected void onCreate(Bundle savedInstanceState) {
-                super.onCreate(savedInstanceState);
-                getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-                WebView wv = new WebView(this);
-                wv.getSettings().setJavaScriptEnabled(true);
-                wv.getSettings().setDomStorageEnabled(true);
-                wv.getSettings().setMediaPlaybackRequiresUserGesture(false);
-                wv.setWebChromeClient(new WebChromeClient());
-                wv.loadUrl("file:///android_asset/index.html");
-                setContentView(wv);
-            }
-        }
-        EOF
-
-        cat > app/src/main/res/values/styles.xml << 'EOF'
-        <?xml version="1.0" encoding="utf-8"?>
-        <resources>
-            <style name="AppTheme" parent="android:Theme.NoTitleBar.Fullscreen"/>
-        </resources>
-        EOF
-
-    - name: Setup Gradle
-      run: |
-        cat > gradle/wrapper/gradle-wrapper.properties << 'EOF'
-        distributionUrl=https\://services.gradle.org/distributions/gradle-8.4-bin.zip
-        EOF
-        mkdir -p gradle/wrapper
-        curl -o gradle/wrapper/gradle-wrapper.jar \
-          https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradle/wrapper/gradle-wrapper.jar
+        cat > app/src/main/res/values/styles.xml << 'STEOF'
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="android:Theme.NoTitleBar.Fullscreen"/>
+</resources>
+STEOF
 
     - name: Build APK
-      run: chmod +x gradlew && ./gradlew assembleRelease
+      run: $GRADLE assembleRelease --project-dir .
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
