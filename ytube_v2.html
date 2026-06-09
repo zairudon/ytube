@@ -149,6 +149,10 @@ body{font-family:Roboto,Arial,sans-serif;background:var(--dark);color:var(--text
       <button class="ab red" onclick="openYT()">▶ YouTube mein kholein</button>
       <button class="ab" onclick="shareV()">↗ Share</button>
     </div>
+    <div style="margin-top:14px">
+      <div style="font-size:14px;font-weight:600;margin-bottom:10px;color:var(--sub)">🎬 Aur Videos</div>
+      <div id="relatedVideos"><div class="loading"><div class="spin"></div></div></div>
+    </div>
   </div>
 </div>
 
@@ -457,6 +461,30 @@ function play(id, title, ch, views){
   document.getElementById('player').classList.add('open');
   document.body.style.overflow = 'hidden';
   history.pushState({p:true},'');
+  loadRelated(title, ch);
+}
+
+async function loadRelated(title, ch){
+  const el = document.getElementById('relatedVideos');
+  el.innerHTML = '<div class="loading"><div class="spin"></div></div>';
+  try {
+    const q = ch || title.split(' ').slice(0,4).join(' ');
+    const data = await fetchYouTubeVideos(q);
+    const filtered = data.videos.filter(v => v.id !== curVid).slice(0, 8);
+    if(!filtered.length){ el.innerHTML = ''; return; }
+    el.innerHTML = filtered.map(v => {
+      const thumb = esc(v.thumb || `https://i.ytimg.com/vi/${v.id}/mqdefault.jpg`);
+      const t = esc(v.title||'');
+      const c = esc(v.ch||'');
+      return `<div class="vc" onclick="playById(this)" data-id="${esc(v.id)}" data-title="${t}" data-ch="${c}" data-views="${esc(v.views||'')}">
+        <div class="thb"><img src="${thumb}" loading="lazy" onerror="this.src='https://i.ytimg.com/vi/${esc(v.id)}/hqdefault.jpg'"/>
+        ${v.dur?`<span class="dur">${v.dur}</span>`:''}
+        </div>
+        <div class="cm"><div class="av">${(c.charAt(0)||'Y').toUpperCase()}</div>
+        <div class="ci"><div class="cti">${t}</div><div class="cch">${c}</div><div class="cst">${v.views||''}</div></div></div>
+      </div>`;
+    }).join('');
+  } catch(e){ el.innerHTML = ''; }
 }
 
 function closePlayer(){
