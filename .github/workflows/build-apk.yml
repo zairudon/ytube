@@ -28,9 +28,20 @@ jobs:
 
           mkdir -p app/src/main/assets
           mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/res/mipmap-mdpi
+          mkdir -p app/src/main/res/mipmap-hdpi
+          mkdir -p app/src/main/res/mipmap-xhdpi
+          mkdir -p app/src/main/res/mipmap-xxhdpi
+          mkdir -p app/src/main/res/mipmap-xxxhdpi
           mkdir -p app/src/main/java/com/zairudon/ytube
 
           cp ytube_v13.html app/src/main/assets/index.html
+
+          cp ytube_icon_v5.png app/src/main/res/mipmap-mdpi/ic_launcher.png
+          cp ytube_icon_v5.png app/src/main/res/mipmap-hdpi/ic_launcher.png
+          cp ytube_icon_v5.png app/src/main/res/mipmap-xhdpi/ic_launcher.png
+          cp ytube_icon_v5.png app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          cp ytube_icon_v5.png app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
 
           echo "include ':app'" > settings.gradle
 
@@ -64,7 +75,7 @@ jobs:
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
             <uses-permission android:name="android.permission.INTERNET"/>
-            <application android:label="YTube" android:usesCleartextTraffic="true" android:theme="@style/AppTheme">
+            <application android:label="YTube" android:icon="@mipmap/ic_launcher" android:usesCleartextTraffic="true" android:theme="@style/AppTheme">
               <activity android:name=".MainActivity" android:exported="true">
                 <intent-filter>
                   <action android:name="android.intent.action.MAIN"/>
